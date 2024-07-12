@@ -149,7 +149,7 @@
                 ```
 
             - **semi**
-                > returns data only from left DF
+                > returns data only from left DF where there is a match with right DF
                 ```python
                 result = df.join(df1, 
                                 df.id == df1.id, 
@@ -158,7 +158,7 @@
                 ```
 
             - **anti**
-                > opposite of ```semi``` returns data which not exists in right DF
+                > opposite of ```semi``` data only from left DF where there is no match with right DF
                 ```python
                 result = df.join(df1, 
                                 df.id == df1.id, 
