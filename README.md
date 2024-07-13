@@ -270,6 +270,15 @@
         - auto scaling
         - cluster vm type/size
         - cluster policy
+        - cluster permission
+            - **can attach permission on cluster**:
+                > This most **granular** level permission allows a user to attach notebooks or jobs to a cluster. The user can run code on the cluster but cannot modify or terminate the cluster itself. Essentially, **it enables the user to use the cluster for their computations.**
+            
+            - **can restart permission on cluster**:
+                > This permission allows a user to restart the cluster. Restarting a cluster can be necessary to apply configuration changes or resolve issues. **The user cannot change other settings or terminate the cluster but can refresh it by restarting.**
+            
+            - **can manage permission on cluster**:
+                > This **highest** permission is the most powerful of the three. It allows the user to perform all administrative tasks on the cluster, including creating, editing, restarting, and terminating the cluster. Additionally, the user can manage the cluster's permissions, giving them control over who else can access and modify the cluster.
 
 + **catalog**
     - create permission
