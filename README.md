@@ -289,7 +289,17 @@
             CREATE TABLE, 
             USE CATALOG 
         ON CATALOG catalog_name 
-        TO `samrat.mitra@vivasoftltd.com` 
+        TO `user_mail` 
+        ;
+        ```
+    - revoke permission
+        ```sql
+        %sql
+        REVOKE 
+        CREATE SCHEMA,
+        CREATE TABLE
+        ON CATALOG samrat_big_data_ecosystem_workspace
+        FROM `user_mail`
         ;
         ```
 + **databricks utilities**
