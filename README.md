@@ -302,6 +302,28 @@
         FROM `user_mail`
         ;
         ```
++ **schema**
+    - schema info
+        ```sql
+        %sql
+        show grant on schema schema_name;
+        ```
+    - create table permission
+        ```sql
+        %sql
+        GRANT 
+            CREATE TABLE 
+        ON SCHEMA schema_name 
+        TO `user_mail`
+        ;
+        ```
+    - select table permission
+        ```sql
+        %sql
+        GRANT 
+            SELECT 
+        ON TABLE workspace_name.schema_name.table_name TO `user_mail`;
+        ```
 + **databricks utilities**
     - file system utilities
         ```sh
