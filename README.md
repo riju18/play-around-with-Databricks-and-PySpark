@@ -271,6 +271,18 @@
         - cluster vm type/size
         - cluster policy
 
++ **catalog**
+    - create permission
+        ```sql
+        %sql
+        GRANT 
+            CREATE SCHEMA, 
+            CREATE TABLE, 
+            USE CATALOG 
+        ON CATALOG catalog_name 
+        TO `samrat.mitra@vivasoftltd.com` 
+        ;
+        ```
 + **databricks utilities**
     - file system utilities
         ```sh
