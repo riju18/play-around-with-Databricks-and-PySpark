@@ -47,6 +47,12 @@
     spark_core
     RDD:3
     ```
+
++ **view**
+    + **temp**
+        > Only available in spark session(current notebook)
+    + **global**
+        > Available in all notebooks attached to same cluster
 + **code example**
     + **read from csv**
         ```python
