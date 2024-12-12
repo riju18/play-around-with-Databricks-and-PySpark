@@ -330,6 +330,28 @@
             SELECT 
         ON TABLE workspace_name.schema_name.table_name TO `user_mail`;
         ```
+    
+    - to prevent drop col is not supported for delta table 
+        ```sql
+        ALTER TABLE schema_name.table_name 
+        SET TBLPROPERTIES (
+            'delta.minReaderVersion' = '2',
+            'delta.minWriterVersion' = '5',
+            'delta.columnMapping.mode' = 'name'
+        );
+
+        ALTER TABLE schema_name.table_name 
+        DROP COLUMN data_ingestion_time;
+        ```
+    
+    - add & set col default value 
+        ```sql
+        ALTER TABLE schema_name.table_name 
+        SET TBLPROPERTIES ('delta.feature.allowColumnDefaults' = 'enabled'); 
+
+        ALTER TABLE schema_name.table_name 
+        ALTER COLUMN col_name SET DEFAULT current_timestamp();
+        ```
 + **databricks utilities**
     - file system utilities
         ```sh
