@@ -54,13 +54,19 @@
     + **global**
         > Available in all notebooks attached to same cluster
 + **code example**
-    + **read from csv**
-        ```python
-        df = spark.read \
-        .option("header", True) \  # to identify header
-        .option("inferSchema", True) \  # to identify datatype(slow)
-        .csv(filepath)  # dataframe
-        ```
+    + **get data**
+        - from csv
+            ```python
+            df = spark.read \
+            .option("header", True) \  # to identify header
+            .option("inferSchema", True) \  # to identify datatype(slow)
+            .csv(filepath)  # dataframe
+            ```
+        - from table 
+            ```python
+            sql_code = "select * from schema_name.table_name" 
+            df = spark.sql(sql_code)
+            ```
     + **schema**
         + **get schema**
             ```python
@@ -117,6 +123,11 @@
         + **write data**
             ```python
             df.write.mode("overwrite/append").parquet("filePath")
+
+            # or,
+            df.write.option('mergeSchema', "true") \ 
+            .mode("append") \ 
+            .saveAsTable("schema_name.table_name")
             ```
         
         + **prevent schema change error**
