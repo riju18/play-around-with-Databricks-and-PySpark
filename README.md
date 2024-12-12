@@ -103,7 +103,7 @@
             from pyspark.sql.functions import current_timestamp,lt
 
             df1 = df.withColumn("ingestion_date", current_timestamp()) \
-            .withColumn("env", lit("prod"))  # col with sattic value
+            .withColumn("env", lit("prod"))  # col with static value
             
             # or,
             df2 = spark.createDataFrame(data=data, schema=StringType()).withColumns(
