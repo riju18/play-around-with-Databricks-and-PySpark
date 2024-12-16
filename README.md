@@ -2,6 +2,7 @@
 
 + [Apache Spark](#apache_spark)
 + [Databricks](#databricks)
++ [Get data](#get_data)
 
 # apache_spark
 
@@ -413,3 +414,24 @@
                 ```
         - job
             
+# get_data
+
+- **s3**
+    1. set the env var in databricks cluster
+    2. execute the code
+        ```python
+        import os
+
+        access_key = os.getenv("access_key")
+        secret_key = os.getenv("secret_key")
+        s3_endpoint = os.getenv("s3_endpoint")
+
+        spark.conf.set("fs.s3a.access.key", access_key)
+        spark.conf.set("fs.s3a.secret.key", secret_key)
+        spark.conf.set("fs.s3a.endpoint", s3_endpoint)  # s3.ap-southeast-1.amazonaws.com
+
+        df = spark.read.option("header", "true") \
+            .csv("s3://samrat-sample-fintech-data-temp/financial_sample_data.csv")
+
+        display(df.limit(10))
+        ```
