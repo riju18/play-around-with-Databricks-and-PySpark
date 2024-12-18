@@ -442,9 +442,9 @@
 - using notebook 
     1. upload `requirements.txt` in dbfs:
 
-        i. navigate to `data ingestion`
+        a. navigate to `data ingestion`
 
-        ii. from `add data` field 
+        b. from `add data` field 
             - select `upload file to DBFS`
 
     2. install dependencies
@@ -469,14 +469,15 @@
         ```
 
 - using `compute`
-    i. navigate to `Compute`
 
-    ii. select `cluster` 
+    a. navigate to `Compute`
+
+    b. select `cluster` 
     
-    iii. select libraries 
+    c. select libraries 
     
-    iv. click `install new`
+    d. click `install new`
     
-    v. select `workspace`
+    e. select `workspace`
     
-    vi. click `install`
+    f. click `install`
