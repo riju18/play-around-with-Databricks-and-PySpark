@@ -3,6 +3,7 @@
 + [Apache Spark](#apache_spark)
 + [Databricks](#databricks)
 + [Get data](#get_data)
++ [Install Packages](#install_package)
 
 # apache_spark
 
@@ -435,3 +436,47 @@
 
         display(df.limit(10))
         ```
+
+# install_package
+
+- using notebook 
+    1. upload `requirements.txt` in dbfs:
+
+        i. navigate to `data ingestion`
+
+        ii. from `add data` field 
+            - select `upload file to DBFS`
+
+    2. install dependencies
+        ```python
+        # Install the packages listed in requirements.txt
+        dbfs.fs.ls("/")  # get all root path
+
+        dbutils.fs.cp("dbfs file path", "file:/tmp/requirements.txt")
+
+        # Use pip to install the packages
+        %pip install -r /tmp/requirements.txt
+        ```
+    
+    3. restart kernel
+        ```sh
+        %restart_python
+        ```
+        or 
+
+        ```python
+        dbutils.library.restartPython()
+        ```
+
+- using `compute`
+    i. navigate to `Compute`
+
+    ii. select `cluster` 
+    
+    iii. select libraries 
+    
+    iv. click `install new`
+    
+    v. select `workspace`
+    
+    vi. click `install`
