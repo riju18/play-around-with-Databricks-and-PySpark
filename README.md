@@ -2,8 +2,14 @@
 
 + [Apache Spark](#apache_spark)
 + [Databricks](#databricks)
++ [Security](#security)
 + [Get data](#get_data)
 + [Install Packages](#install_package)
++ [Delta vs. Parquet](#delta_vs_parquet)
++ [Delta table time travel](#time_travel)
++ [Databricks widgets](#dbc_widgets)
++ [Databricks Aggregation](#dbc_aggregation)
++ [unity catalog](#unity_catalog)
 
 # apache_spark
 
@@ -130,6 +136,25 @@
             df.write.option('mergeSchema', "true") \ 
             .mode("append") \ 
             .saveAsTable("schema_name.table_name")
+            ```
+            different sets of example:
+
+            ```python
+            df.write \
+                .format("parquet") \  # Specify the format (e.g., "parquet", "csv", "json", "orc", "jdbc", "delta")
+                .option("path", "/path/to/save") \  # Specify the path to save the data
+                .option("mode", "append") \  # Specify the write mode (e.g., "append", "overwrite", "ignore", "error" or "errorifexists")
+                .option("partitionBy", "column_name") \  # Specify the column(s) to partition the data by
+                .option("bucketBy", 4, "column_name") \  # Specify the number of buckets and the column to bucket by
+                .option("sortBy", "column_name") \  # Specify the column to sort by within each bucket
+                .option("compression", "snappy") \  # Specify the compression codec (e.g., "none", "bzip2", "gzip", "lz4", "snappy", "deflate")
+                .option("mergeSchema", True) \  # Specify whether to merge schemas
+                .option("pathGlobFilter", "*.parquet") \  # Specify a glob pattern to filter the files
+                .option("recursiveFileLookup", "true") \  # Specify whether to recursively look up files
+                .option("timestampFormat", "yyyy-MM-dd'T'HH:mm:ss") \  # Specify the timestamp format
+                .option("dateFormat", "yyyy-MM-dd") \  # Specify the date format
+                .option("nullValue", "NULL") \  # Specify the string representation of null values
+                .save("/path/to/save")  # Specify the path to save the data 
             ```
         
         + **prevent schema change error**
@@ -414,7 +439,141 @@
                 dbutils.notebook.exit("Success")  # param: value
                 ```
         - job
-            
+
+# security
+
+- **design**
+    ```mermaid
+    flowchart TB
+
+    notebook_cluster_job <--> dbc_secret_scope <--> azure_key_vault_aws_or_aws_secret_manager_or_GCP
+    ```
+
+- Create secret key
+
+    1. create scope
+
+        ```python
+         import requests
+         import json
+
+         # Secret scope name you want to create
+        scope_name = 'aws_secret_scope'
+
+        # Replace these variables with your Databricks workspace information
+        databricks_instance = 'https://dbc-123456-a1c3.cloud.databricks.com'
+        databricks_token = 'generated token'
+
+        # Headers for the API request
+        headers = {
+            'Authorization': f'Bearer {databricks_token}',
+            'Content-Type': 'application/json'
+        }
+
+        # create scope
+        # Payload for creating a secret scope
+        payload = {
+            'scope': scope_name,
+            'initial_manage_principal': 'users'  # Initial managing principal. Can be 'users' or 'admins'
+        }
+
+        # Databricks API endpoint for creating a secret scope
+        url = f'{databricks_instance}/api/2.0/secrets/scopes/create'
+
+        # Make the API request to create the secret scope
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+
+        # Check the response
+        if response.status_code == 200:
+            print(f'Successfully created secret scope: {scope_name}')
+        else:
+            print(f'Failed to create secret scope: {response.status_code}')
+            print(response.json())
+
+        ```
+    
+    2. create secret 
+
+        ```python
+        secret_key_payload = {
+            "scope": "aws_secret_scope",
+            "key": "secret_key",
+            "string_value": "aws s3 secret key"
+        }
+
+        access_key_payload = {
+            "scope": "aws_secret_scope",
+            "key": "access_key",
+            "string_value": "aws s3 access key"
+        }
+
+        url_payload = {
+            "scope": "aws_secret_scope",
+            "key": "s3_bucket_endpoint",
+            "string_value": "s3.ap-southeast-1.amazonaws.com"
+        }
+
+        # Databricks API endpoint for creating a secret scope
+        url = f'{databricks_instance}/api/2.0/secrets/put'
+
+        # Make the API request to create the secret key in secret scope
+        secret_key_response = requests.post(url, 
+                                            headers=headers,
+                                            data=json.dumps(secret_key_payload)
+                                            )
+
+        access_key_response = requests.post(url, 
+                                            headers=headers,
+                                            data=json.dumps(access_key_payload)
+                                            )
+
+        url_payload_response = requests.post(url, 
+                                            headers=headers,
+                                            data=json.dumps(url_payload)
+                                            )
+
+        # Check the response
+        if secret_key_response.status_code == 200:
+            print(f'Successfully added secret key')
+        else:
+            print(f'Failed to create secret scope: {secret_key_response.status_code}')
+            print(secret_key_response.json())
+
+        if access_key_response.status_code == 200:
+            print(f'Successfully added access key')
+        else:
+            print(f'Failed to create access key: {access_key_response.status_code}')
+            print(access_key_response.json())
+
+        if url_payload_response.status_code == 200:
+            print(f'Successfully added url endpoint')
+        else:
+            print(f'Failed to create url endpoint: {url_payload_response.status_code}')
+            print(url_payload_response.json())
+
+        ```
+    
+    3. dbc secret key methods
+
+        - dbutils.secrets.help()
+
+        - list of scope: 
+            ```python
+            dbutils.secrets.listScopes()
+            ```
+        
+        - specific secret 
+            ```python
+            dbutils.secrets.list("aws_secret_scope") 
+            ```
+        
+        - get the secret key 
+            ```python
+            dbutils.secrets.get('aws_secret_scope', 'secret_key')
+            ```
+    
+    4. api list for secret scope: [**click here**](https://docs.databricks.com/api/workspace/secrets)
+
 # get_data
 
 - **s3**
@@ -481,3 +640,98 @@
     e. select `workspace`
     
     f. click `install`
+
+# delta_vs_parquet
+
+- Delta Lake
+    - **ACID Transactions**: Delta Lake provides ACID (Atomicity, Consistency, Isolation, Durability) transaction guarantees, which means it can handle concurrent read and write operations without data corruption.
+
+    - **Schema Evolution**: Delta Lake supports schema evolution, allowing you to change the schema of your data without breaking existing queries.
+
+    - **Time Travel**: Delta Lake allows you to query previous versions of your data, which is useful for auditing and debugging.
+
+    - **Data Lineage**: Delta Lake maintains a transaction log that records all changes to the data, providing a full history of operations.
+
+    - **Optimized Performance**: Delta Lake includes optimizations like data skipping and Z-order indexing to improve query performance.
+
+- Parquet
+    - **Columnar Storage**: Parquet is a columnar storage format that is optimized for read-heavy operations, making it efficient for analytical queries.
+
+    - **Compression**: Parquet supports various compression algorithms, which can reduce storage costs and improve I/O performance.
+
+    - **Schema Enforcement**: Parquet enforces a schema, but it does not support schema evolution as seamlessly as Delta Lake.
+
+    - **No ACID Transactions**: Parquet does not provide ACID transaction guarantees, which can lead to data consistency issues in concurrent environments.
+
+    - **No Time Travel**: Parquet does not support querying previous versions of the data.
+
+- Recommendation
+    >
+    > Databricks recommends using Delta Lake instead of Parquet for most use cases due to its additional features and optimizations.
+    >
+# time_travel
+
+- **Table history**
+    ```sql
+    describe history scehma.table_name
+    ```
+- **time travel**
+    ```sql
+    select 
+        * 
+    from 
+        schema_name.table_name 
+    TIMESTAMP AS OF '2025-01-06 08:18:07' limit 10;
+    ```
+
+# dbc_widgets
+
+- **widgets info**
+    ```python
+    display(dbutils.widgets.help())
+    ```
+
+- **set widget**
+    ```python
+    dbutils.widgets.text("username", spark.sql("SELECT current_user() AS user").first()[0])
+    ```
+
+- **get value from widget**
+    ```python
+    get_user = dbutils.widgets.get("username")
+    ```
+
+# dbc_aggregation
+
+- **min/max**
+    ```python
+    max_year = df.agg({'year': 'max'}).collect()
+    min_year = df.agg({'year': 'min'}).collect()
+    ```
+
+- **grouping**
+
+    ```pyhton
+    from pyspark.sql.functions import sum, count
+    ```
+
+    1. group by col
+        ```python
+        grouping_by_yr = df.groupBy('year')\
+        .agg(sum('value').alias('total_value'))\
+        .limit(10)
+        ```
+    2. count
+        ```python
+        no_of_rows_by_date = df.withColumn('bronze_data_ingestion_date', df['bronze_data_ingestion_date'].cast('date'))\
+        .groupBy('bronze_data_ingestion_date')\
+        .agg((count('stg').cast('float')).alias('total_no_of_rows'))\
+        .orderBy('bronze_data_ingestion_date')
+        ```
+
+
+# unity_catalog
+
+>
+> Unity Catalog is a unified governance solution for all data and AI assets in Databricks. It provides a centralized metadata store and a three-level namespace (catalog.schema.table) for organizing and managing data assets such as tables, views, volumes, models, and functions. Unity Catalog operates on the principle of least privilege, ensuring users have the minimum access necessary to perform their tasks. It supports familiar ANSI SQL syntax for creating and managing database objects and integrates with Delta Sharing and Databricks Marketplace for secure data sharing and exchange
+> 
