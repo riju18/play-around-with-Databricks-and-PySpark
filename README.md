@@ -311,7 +311,7 @@
 
             databricks_runtime_light --> light(runtime option for only jobs not requiring advamced features)
             ```
-        - auto teermination
+        - auto termination
         - auto scaling
         - cluster vm type/size
         - cluster policy
