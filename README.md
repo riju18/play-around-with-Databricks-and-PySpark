@@ -10,6 +10,7 @@
 + [Databricks widgets](#dbc_widgets)
 + [Databricks Aggregation](#dbc_aggregation)
 + [Databricks filesystem](#dbfs)
++ [Save data as parquet](#parquet)
 + [unity catalog](#unity_catalog)
 
 # apache_spark
@@ -745,6 +746,20 @@
 + **remove dir**
     ```python
     dbutils.fs.rm('/data_lake/finance/bronze', recurse=True)
+    ```
+
+# parquet
+
+- save dataframe as parquet
+    ```python
+    df = df.withColumn("bronze_data_ingestion_date", to_date("bronze_data_ingestion_date"))
+
+    df.write.format("parquet") \
+        .option("mergeSchema", True) \
+        .mode("append") \
+        .option("sortBy", "year") \
+        .partitionBy("bronze_data_ingestion_date") \
+        .save(path)
     ```
 
 # unity_catalog
