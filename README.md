@@ -9,6 +9,7 @@
 + [Delta table time travel](#time_travel)
 + [Databricks widgets](#dbc_widgets)
 + [Databricks Aggregation](#dbc_aggregation)
++ [Databricks filesystem](#dbfs)
 + [unity catalog](#unity_catalog)
 
 # apache_spark
@@ -729,6 +730,22 @@
         .orderBy('bronze_data_ingestion_date')
         ```
 
+# dbfs
+
++ **get filelist**
+    ```python
+    dbutils.fs.ls('/')
+    ```
+
++ **create dir**
+    ```python
+    dbutils.fs.mkdirs('/data_lake/finance/bronze')
+    ```
+
++ **remove dir**
+    ```python
+    dbutils.fs.rm('/data_lake/finance/bronze', recurse=True)
+    ```
 
 # unity_catalog
 
