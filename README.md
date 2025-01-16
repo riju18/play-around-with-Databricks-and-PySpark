@@ -11,6 +11,7 @@
 + [Databricks Aggregation](#dbc_aggregation)
 + [Databricks filesystem](#dbfs)
 + [Save data as parquet](#parquet)
++ [SQL struct and explode](#struct_explode)
 + [unity catalog](#unity_catalog)
 
 # apache_spark
@@ -760,6 +761,64 @@
         .option("sortBy", "year") \
         .partitionBy("bronze_data_ingestion_date") \
         .save(path)
+    ```
+
+# struct_explode
+
+- real example
+    ```sql
+
+        %sql
+        with cte as (
+        select
+            cast(bronze_data_ingestion_date as date) as bronze_data_ingestion_date
+            , year
+            , count(distinct industry_aggregation_nzsioc) as total_unique_industry_nzsioc
+            , count(distinct industry_code_nzsioc) as total_unique_industry_code_nzsioc
+            , count(distinct industry_name_nzsioc) as total_unique_industry_name_nzsioc
+            , count(distinct units) as unique_units
+            , count(distinct variable_code) as unique_var_codes
+            , count(distinct variable_name) as unique_var_names
+            , count(distinct variable_category) as unique_variable_category
+            , count(distinct industry_code_anzsic06) as unique_industry_code_anzsic06
+        from 
+            bronze.financial_raw_data
+        group by 1,2
+        ),
+        convert_to_struct as (  -- sql struct to get rid of redundant rows for same value
+        select
+            bronze_data_ingestion_date
+            , struct(  -- make it a struct data type
+            array_agg(year) as year
+            , array_agg(total_unique_industry_nzsioc) as unique_industry_aggregation_nzsioc
+            , array_agg(total_unique_industry_code_nzsioc) as industry_code_nzsioc
+            , array_agg(total_unique_industry_name_nzsioc) as industry_name_nzsioc
+            , array_agg(unique_units) as units
+            , array_agg(unique_var_codes) as var_codes
+            , array_agg(unique_var_names) as var_names
+            , array_agg(unique_variable_category) as variable_category
+            , array_agg(unique_industry_code_anzsic06) as industry_code_anzsic06
+            ) as struct_data
+        from
+        cte
+        group by 1
+        ),
+        exploding as (  -- extract the array value
+        select
+            bronze_data_ingestion_date
+            , explode(struct_data.year) as yr 
+            , explode(struct_data.unique_industry_aggregation_nzsioc) as unique_industry_aggregation_nzsioc
+        from
+            convert_to_struct
+        )
+        select
+        bronze_data_ingestion_date
+        , yr
+        , sum(unique_industry_aggregation_nzsioc) as total_val
+        from
+        exploding
+        group by 1,2 
+        ;
     ```
 
 # unity_catalog
