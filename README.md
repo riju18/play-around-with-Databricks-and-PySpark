@@ -12,6 +12,7 @@
 + [Databricks filesystem](#dbfs)
 + [Save data as parquet](#parquet)
 + [SQL struct and explode](#struct_explode)
++ [Temporary View](#temp_view)
 + [unity catalog](#unity_catalog)
 
 # apache_spark
@@ -820,6 +821,46 @@
         group by 1,2 
         ;
     ```
+
+# temp_view
+
+- **create temp view** 
+
+    ```python
+        df.createOrReplaceTempView('df_tmp_view') 
+    ```
+
+    ```sql 
+        %sql
+        select * from df_tmp_view 
+    ```
+
+- **create global temp view**
+
+    ```python
+    df.createOrReplaceGlobalTempView('df_global_tmp_view') 
+    ```
+
+    ```sql 
+        %sql
+        select * from global_temp.df_global_tmp_view
+    ```
+
+- **create permanent view**
+    
+    ```python
+    spark.sql("""
+          create or replace view default.df_view 
+          as select * from bronze.financial_raw_data 
+          limit 10
+        """)
+    ```
+
+    ```sql 
+        %sql
+        select * from default.df_view
+    ```
+
 
 # unity_catalog
 
